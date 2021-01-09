@@ -11,6 +11,9 @@ struct ContentView: View {
     @State private var wakeUp=Date()
     @State private var sleepAmount = 8.0
     @State private var coffeeAmount=1
+    @State private var alertTitle=""
+    @State private var alertMessage=""
+    @State private var showingAlert=false
     var body: some View {
         NavigationView{
             VStack{
@@ -39,7 +42,9 @@ struct ContentView: View {
             .navigationBarItems(trailing: Button(action:calculateBedTime){
                 Text("Calculate")
             })
-        }
+        }.alert(isPresented: $showingAlert, content: {
+            Alert(title: Text(alertTitle),message: Text(alertMessage),dismissButton: .default(Text("OK")))
+        })
     }
     func calculateBedTime(){
         let model: SleepCalculator = {
@@ -58,9 +63,16 @@ struct ContentView: View {
             let predictions = try
                 model.prediction(wake: Double( hour + minute ), estimatedSleep: sleepAmount,coffee: Double(coffeeAmount))
             let sleepTime = wakeUp-predictions.actualSleep
+            let formatter = DateFormatter()
+            formatter.timeStyle = .short
+            alertMessage=formatter.string(from: sleepTime)
+            alertTitle="Your ideal bedtime is ..."
         }catch{
+            alertTitle="Error"
+            alertMessage="Ooopsie"
             
         }
+        showingAlert=true
     }
       
         
